@@ -1,4 +1,4 @@
-const Pool = require("pg").Pool;
+import { Pool } from "pg";
 const pool = new Pool({
   user: "postgres",
   password: "toor",
@@ -7,4 +7,4 @@ const pool = new Pool({
   database: "node_postgres",
 });
 
-module.exports = pool;
+export default pool;
