@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 
 import API from "./API.js";
 
+import arrow_sort from "./img/arrow_sort.svg";
+import clean_sort from "./img/clean_sort.svg";
 import checkmark from "./img/checkmark.svg";
 import bucket from "./img/bucket.svg";
 import arrow from "./img/arrow.svg";
@@ -12,7 +14,39 @@ function App() {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [selectedItem, setSelectedItem] = useState(0);
-  const visibleTable = data.slice((page - 1) * 10).slice(0, 10);
+  const [sortBy, setSortBy] = useState("none");
+
+  const sortedTable = () => {
+    switch (sortBy) {
+      case "name":
+        return data.sort((a, b) => a.name.localeCompare(b.name));
+      case "!name":
+        return data
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice()
+          .reverse();
+      case "qty":
+        return data.sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity));
+      case "!qty":
+        return data
+          .sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity))
+          .slice()
+          .reverse();
+      case "dist":
+        return data.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+      case "!dist":
+        return data
+          .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+          .slice()
+          .reverse();
+      default:
+        return data;
+    }
+  };
+  // const sortedTable = sortBy === "none" ? data : data.sort((a, b) => a.sortBy.localeCompare(b.sortBy));
+  const visibleTable = sortedTable()
+    .slice((page - 1) * 10)
+    .slice(0, 10);
 
   const [newDate, setNewDate] = useState("");
   const [newName, setNewName] = useState("");
@@ -125,10 +159,24 @@ function App() {
           <tbody>
             <tr onClick={() => setSelectedItem(0)}>
               <th>Дата</th>
-              <th>Название</th>
-              <th>Количество</th>
-              <th>Расстояние</th>
-              <th className="last-table"></th>
+              <th onClick={() => (sortBy === "name" ? setSortBy("!name") : setSortBy("name"))}>
+                Название
+                <img src={arrow_sort} alt="sort" style={sortBy === "name" ? { position: "absolute" } : { display: "none" }} className="sort" />
+                <img src={arrow_sort} alt="sort" style={sortBy === "!name" ? { position: "absolute" } : { display: "none" }} className="sort-back" />
+              </th>
+              <th onClick={() => (sortBy === "qty" ? setSortBy("!qty") : setSortBy("qty"))}>
+                Количество
+                <img src={arrow_sort} alt="sort" style={sortBy === "qty" ? { position: "absolute" } : { display: "none" }} className="sort" />
+                <img src={arrow_sort} alt="sort" style={sortBy === "!qty" ? { position: "absolute" } : { display: "none" }} className="sort-back" />
+              </th>
+              <th onClick={() => (sortBy === "dist" ? setSortBy("!dist") : setSortBy("dist"))}>
+                Расстояние
+                <img src={arrow_sort} alt="sort" style={sortBy === "dist" ? { position: "absolute" } : { display: "none" }} className="sort" />
+                <img src={arrow_sort} alt="sort" style={sortBy === "!dist" ? { position: "absolute" } : { display: "none" }} className="sort-back" />
+              </th>
+              <th onClick={() => setSortBy("none")} className="last-table">
+                <img src={clean_sort} alt="clean sort" style={sortBy !== "none" ? {} : { display: "none" }} className="sort" />
+              </th>
             </tr>
             {visibleTable.map((el, ind) => (
               <tr key={ind}>

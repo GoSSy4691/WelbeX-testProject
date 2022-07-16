@@ -93,6 +93,15 @@ img {
   transform: scale(-1, 1);
 }
 
+.sort {
+  cursor: default;
+}
+
+.sort-back {
+  transform: scaleY(-1);
+  cursor: default;
+}
+
 .checkmark {
   width: 37px;
   position: absolute;
