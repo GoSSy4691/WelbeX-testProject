@@ -16,47 +16,87 @@ function App() {
   const [selectedItem, setSelectedItem] = useState(0);
   const [sortBy, setSortBy] = useState("none");
 
-  const sortedTable = () => {
-    switch (sortBy) {
-      case "name":
-        return data.sort((a, b) => a.name.localeCompare(b.name));
-      case "!name":
-        return data
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .slice()
-          .reverse();
-      case "qty":
-        return data.sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity));
-      case "!qty":
-        return data
-          .sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity))
-          .slice()
-          .reverse();
-      case "dist":
-        return data.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
-      case "!dist":
-        return data
-          .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
-          .slice()
-          .reverse();
-      default:
-        return data;
-    }
-  };
-  // const sortedTable = sortBy === "none" ? data : data.sort((a, b) => a.sortBy.localeCompare(b.sortBy));
-  const visibleTable = sortedTable()
-    .slice((page - 1) * 10)
-    .slice(0, 10);
-
   const [newDate, setNewDate] = useState("");
   const [newName, setNewName] = useState("");
   const [newQuantity, setNewQuantity] = useState(0);
   const [newDistance, setNewDistance] = useState(0);
 
-  useEffect(() => {
-    !data.length && fetchData();
-    isLoading && setLoading(false);
-  }, []);
+  const [isfiltered, setIsfiltered] = useState(false);
+  const [filterBy, setFilterBy] = useState("");
+  const [filterArg, setFilterArg] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+
+  const filteredTable = () => {
+    if (!isfiltered || !filterBy.length || !filterArg.length || !filterValue.length) {
+      isfiltered && setIsfiltered(false);
+      return data;
+    }
+    if (filterBy === "name") {
+      if (filterArg === "=") {
+        return data.filter((el) => el.name == filterValue);
+      }
+      if (filterArg === "<") {
+        return data.filter((el) => el.name < filterValue);
+      }
+      if (filterArg === ">") {
+        return data.filter((el) => el.name > filterValue);
+      }
+    }
+    if (filterBy === "quantity") {
+      if (filterArg === "=") {
+        return data.filter((el) => el.quantity == filterValue);
+      }
+      if (filterArg === "<") {
+        return data.filter((el) => el.quantity < filterValue);
+      }
+      if (filterArg === ">") {
+        return data.filter((el) => el.quantity > filterValue);
+      }
+    }
+    if (filterBy === "distance") {
+      if (filterArg === "=") {
+        return data.filter((el) => el.distance == filterValue);
+      }
+      if (filterArg === "<") {
+        return data.filter((el) => el.distance < filterValue);
+      }
+      if (filterArg === ">") {
+        return data.filter((el) => el.distance > filterValue);
+      }
+    }
+  };
+
+  const sortedTable = () => {
+    switch (sortBy) {
+      case "name":
+        return filteredTable().sort((a, b) => a.name.localeCompare(b.name));
+      case "!name":
+        return filteredTable()
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .slice()
+          .reverse();
+      case "qty":
+        return filteredTable().sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity));
+      case "!qty":
+        return filteredTable()
+          .sort((a, b) => parseFloat(a.quantity) - parseFloat(b.quantity))
+          .slice()
+          .reverse();
+      case "dist":
+        return filteredTable().sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+      case "!dist":
+        return filteredTable()
+          .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+          .slice()
+          .reverse();
+      default:
+        return filteredTable();
+    }
+  };
+
+  const visibleTable = sortedTable()
+    .slice((page - 1) * 10)
+    .slice(0, 10);
 
   const fetchData = async () => {
     const { data: items } = await API.getItems();
@@ -105,6 +145,19 @@ function App() {
     setNewDistance(event.target.value);
   };
 
+  const filterApply = () => {
+    if (!filterBy.length || !filterArg.length || !filterValue.length) {
+      alert("fill all boxes");
+      return;
+    }
+    setIsfiltered(true);
+  };
+
+  useEffect(() => {
+    !data.length && fetchData();
+    isLoading && setLoading(false);
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header" onClick={() => setSelectedItem(0)}>
@@ -131,9 +184,8 @@ function App() {
         </div>
         <div className="flex-column">
           <span>Выбор колонки</span>
-          <select className="dropdown">
+          <select className="dropdown" onChange={(e) => setFilterBy(e.target.value)}>
             <option value="" defaultValue></option>
-            <option value="date">Дата</option>
             <option value="name">Название</option>
             <option value="quantity">Количество</option>
             <option value="distance">Расстояние</option>
@@ -141,17 +193,25 @@ function App() {
         </div>
         <div className="flex-column">
           <span>Выбор условия</span>
-          <select className="dropdown">
+          <select className="dropdown" onChange={(e) => setFilterArg(e.target.value)}>
             <option value="" defaultValue></option>
-            <option value="name">=</option>
-            <option value="quantity">&lt;</option>
-            <option value="distance">&gt;</option>
+            <option value="=">=</option>
+            <option value="<">&lt;</option>
+            <option value=">">&gt;</option>
           </select>
         </div>
         <div className="flex-column">
           <span>Значение</span>
-          <input className="dropdown-input-header " />
+          <input className="dropdown-input-header" onChange={(e) => setFilterValue(e.target.value)} />
         </div>
+        <img src={checkmark} alt="apply" onClick={filterApply} style={isfiltered ? { filter: " opacity(0.20)" } : {}} />
+        <img
+          src={bucket}
+          alt="del"
+          className="clean-filter"
+          onClick={() => setIsfiltered(false)}
+          style={isfiltered ? {} : { filter: " opacity(0.20)" }}
+        />
       </div>
       {isLoading && <p>LOADING</p>}
       {!isLoading && (
