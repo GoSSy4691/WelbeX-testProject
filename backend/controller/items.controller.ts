@@ -7,7 +7,7 @@ export default class ItemsController {
       const { date, name, quantity, distance } = req.body;
       const newItem = await db.query(
         "INSERT INTO items (date, name, quantity, distance) values ($1, $2, $3, $4) RETURNING *",
-        [date, name, quantity, distance]
+        [new Date(date + "T23:20:00Z"), name, quantity, distance]
       );
       res.json(newItem.rows[0]);
     } catch (error) {
