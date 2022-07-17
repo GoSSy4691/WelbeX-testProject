@@ -2,7 +2,7 @@ import express from "express";
 import db from "../db";
 
 export default class ItemsController {
-  static async createItem(req: express.Request, res: express.Response) {
+  static async create(req: express.Request, res: express.Response) {
     try {
       const { date, name, quantity, distance } = req.body;
       const newItem = await db.query(
@@ -16,7 +16,7 @@ export default class ItemsController {
     }
   }
 
-  static async getItems(_req: express.Request, res: express.Response) {
+  static async getAll(_req: express.Request, res: express.Response) {
     try {
       const items = await db.query("SELECT * FROM items");
       res.json(items.rows);
@@ -26,7 +26,7 @@ export default class ItemsController {
     }
   }
 
-  static async getItem(req: express.Request, res: express.Response) {
+  static async getOne(req: express.Request, res: express.Response) {
     try {
       const { id } = req.params;
       const item = await db.query("SELECT * FROM items WHERE id = $1", [id]);
@@ -37,7 +37,7 @@ export default class ItemsController {
     }
   }
 
-  static async updateItem(req: express.Request, res: express.Response) {
+  static async update(req: express.Request, res: express.Response) {
     try {
       const { date, name, quantity, distance, id } = req.body;
       const item = await db.query(
@@ -51,7 +51,7 @@ export default class ItemsController {
     }
   }
 
-  static async deleteItem(req: express.Request, res: express.Response) {
+  static async delete(req: express.Request, res: express.Response) {
     try {
       const { id } = req.params;
       const item = await db.query("DELETE FROM items WHERE id = $1", [id]);
