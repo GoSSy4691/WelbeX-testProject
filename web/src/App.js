@@ -129,6 +129,7 @@ function App() {
     } else {
       API.createItem(date, name, quantity, distance);
       setData([...data, { date, name, quantity, distance }]);
+      setSelectedItem(0)
     }
   };
 
